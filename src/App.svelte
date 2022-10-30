@@ -1,5 +1,5 @@
 <script>
-  import { Tab } from '../node_modules/bootstrap';
+  import { Tab } from '../node_modules/bootstrap'
   import Counter from './lib/Counter.svelte'
 </script>
 
@@ -20,4 +20,3 @@
 
 
 </main>
-

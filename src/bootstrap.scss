@@ -44,6 +44,10 @@ $headings-font-family: VIC-Bold;
 $font-family-sans-serif: VIC-Regular;
 $component-active-bg: $primary;
 $border-radius: 0;
+$border-radius-sm: 0;
+$border-radius-lg: 0;
+$border-radius-xl: 0;
+$border-radius-2xl: 0;
 
 // 3. Include remainder of required Bootstrap stylesheets
 @import "../node_modules/bootstrap/scss/variables";
@@ -76,6 +80,7 @@ $colors: (
 @import "../node_modules/bootstrap/scss/helpers";
 @import "../node_modules/bootstrap/scss/nav";
 @import "../node_modules/bootstrap/scss/navbar";
+@import "../node_modules/bootstrap/scss/progress";
 @import "../node_modules/bootstrap/scss/transitions";
 @import "../node_modules/bootstrap/scss/card";
 @import "../node_modules/bootstrap/scss/utilities";
