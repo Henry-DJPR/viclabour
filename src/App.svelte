@@ -1,22 +1,28 @@
 <script>
-  import { Tab } from '../node_modules/bootstrap'
-  import Counter from './lib/Counter.svelte'
+  import Sidebar from './lib/Sidebar.svelte'
+  import SidebarToggle from './lib/SidebarToggle.svelte'
+  import PageOverview from './lib/PageOverview.svelte'
+  import BadgeLatest from './lib/BadgeLatest.svelte'
+  import BadgeNext from './lib/BadgeNext.svelte'
 </script>
 
+<Sidebar />
 <main>
+  <div class="container py-4 px-3">
+    <h1 class="mt-3 display-3">DJPR labour dashboard</h1>
+    <div class="row gy-2">
+      <div class="col-sm">
+        <SidebarToggle />
+      </div>
+      <div class="col-sm">
+        <BadgeLatest />
+      </div>
+      <div class="col-sm">
+        <BadgeNext />
+      </div>
+    </div>
 
-  <div class="container py-4 px-3 mx-auto">
-    <h1>DJPR labour dashboard</h1>
-    <p>
-      The DJPR labour dashboard explores information on Victorian employment 
-      and job seekers. Use the sidebar to navigate through information on 
-      various demographics such as regions, age, sex and industry.
-    </p>
-    <button class="btn btn-primary">Primary button</button>
-    <Counter count = {1}/>
-    <Counter count = {10}/>
-    <Counter count = {100}/>
+    <hr class="mb-5" />
+    <PageOverview />
   </div>
-
-
 </main>
