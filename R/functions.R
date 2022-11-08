@@ -67,12 +67,20 @@ comma <- function(val, suffix = NULL, add_sign = FALSE, decimal = 2){
     signs <- NULL
   }
   
-  paste0(
-    signs, 
-    format(round(val, decimal), justify = "none", big.mark = ","), 
-    suffix
+  
+  out <- format(
+    round(val, decimal), 
+    justify = "none", 
+    big.mark = ",", 
+    width = 0
   )
   
+  paste0(
+    signs, 
+    gsub(" ", "", out), 
+    suffix
+  )
+
 }
 
 format_percent <- function(val, add_sign = FALSE){
@@ -116,10 +124,10 @@ tagfun <- function(..., tag, selfclosing = FALSE){
   }
   
   if(selfclosing){
-    open_tag <- paste0("<", tag, attrs, "/>")
+    open_tag <- paste0("<", tag, " ", attrs, "/>")
     return(open_tag)
   } else {
-    open_tag <- paste0("<", tag, attrs, ">")
+    open_tag <- paste0("<", tag, " ", attrs, ">")
     close_tag <- paste0("</", tag, ">")
     return(c(open_tag, unlist(i), close_tag))
   }
@@ -242,6 +250,13 @@ sparkline <- function(
 }
 
 
+# Fill function
+fill <- function(v){
+  fixer <- function(a, b) if(is.na(b)){c(a, a[length(a)])} else {c(a, b)}
+  Reduce(fixer, v)
+}
+
+
 # Generate html table 
 make_table <- function(
     series_ids, 
@@ -301,17 +316,33 @@ make_table <- function(
     "Tables can only have one frequency (e.g. not monthly AND quarterly)"
   )
   
-  # Generate sparklines
+  # Generate sparkline colours
+  colourgroup <- data.table(
+    series_id = factor(series_ids),
+    colour = fill(
+      fifelse(highlight_rows, series_ids, as.character(NA))
+    )
+  )
   
-  sparkcolour <- rep(pal, ceiling(length(series_ids) / length(pal)))
+  sparkcolours <- rep(
+    pal, 
+    ceiling(
+      length(unique(colourgroup$colour)) / length(pal)
+      )
+    )
   
+  colourgroup[, colour := sparkcolours[as.integer(factor(colour))]]
+  df <- colourgroup[df, on = "series_id"]
+  
+  # Generate sparklines and save
   sparkdata <- df[
     date >= max(date) - months(12 * 3), 
-    .(sparkline = sparkline(value, colour = sparkcolour[.GRP])),
+    .(sparkline = sparkline(value, colour = colour[1])),
     series_id
   ]
   sparkdata[, writeLines(sparkline, path_sparkline(series_id)), series_id]
 
+  # Generate sparkline alt text
   sparktext <- df[
     date > max(date) - months(12 * 3), 
     .(
