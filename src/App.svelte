@@ -9,7 +9,9 @@
 <Sidebar />
 <main>
   <div class="container py-4 px-3">
-    <h1 class="mt-3 display-3">DJPR labour dashboard</h1>
+    <h1 class="my-4 display-3 text-center text-md-start">
+      DJPR labour dashboard
+    </h1>
     <div class="row gy-2">
       <div class="col-sm">
         <SidebarToggle />

@@ -11,11 +11,11 @@
   <strong>
     Latest <abbr
       class="text-decoration-none"
-      title="Australian Bureau of Statistic"
+      title="Australian Bureau of Statistics"
     >
       ABS
     </abbr>
     data:
-</strong>
+  </strong>
   {latestDate}
 </a>

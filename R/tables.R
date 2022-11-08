@@ -1,4 +1,8 @@
 
+# Force update?
+force_update <- TRUE
+
+
 
 # Ensure this code is being run in the correct directory (not root)
 if(basename(getwd()) != "R") setwd(normalizePath("./R"))
@@ -89,7 +93,7 @@ latest <- dbGetQuery(
 # Check if any data needs updating
 setDT(latest, key = "table_no")
 
-if(!file.exists("timestamps.rds")){
+if(!file.exists("timestamps.rds") | force_update){
   timestamp_cache <- copy(latest)
   setnames(timestamp_cache, "db_date", "website_date")
   saveRDS(timestamp_cache, "timestamps.rds")
@@ -130,40 +134,35 @@ if(update_required){
       paste(to_update, collapse = "\n")
     )
     
+    table_list <- split(
+      table_meta[table_name %in% to_update],
+      by = "table_name"
+    )
     
+    table_list <- lapply(table_list, \(x){
+      make_table(
+        series_ids = x$series_id,
+        row_headers = x$name,
+        highlight_rows = x$highlight,
+        smoothing = x$smoothing_months,
+        up_is_good = x$up_is_good,
+        notes = x$caption
+      )
+    }) 
+    
+    mapply(
+      function(table, table_name){
+        path <- path_src(paste0("Table", table_name, ".svelte"))
+        writeLines(table, path)
+        },
+      table = table_list,
+      table_name = names(table_list)
+    )
     
     
   }
   
   
 }
-
-
-
-# Youth data = 12m rolling average
-data <- data %>%
-  dplyr::group_by(.data$series_id) %>%
-  dplyr::mutate(value = dplyr::if_else(.data$series_id %in% c(
-    "A84433601W",
-    "A84424691V",
-    "A84424687C",
-    "A84424692W"
-  ),
-  slider::slide_mean(.data$value, before = 11, complete = TRUE),
-  .data$value
-  ))
-
-# Regional data = 3m rolling average
-data <- data %>%
-  dplyr::mutate(
-    value = dplyr::if_else(
-      .data$series_id == "A84600079X",
-      slider::slide_mean(.data$value, before = 2, complete = TRUE),
-      .data$value
-  )) %>%
-  dplyr::ungroup()
-
-
-djprlabourdash:::create_summary_df(data)
 
 

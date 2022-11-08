@@ -1,6 +1,8 @@
 // Custom.scss
 
 // 0.  fonts
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Raleway&family=Roboto+Mono');
+
 @font-face {
   font-family: 'VIC-Regular';
   font-style: normal;
@@ -12,16 +14,16 @@
     url('./assets/fonts/VIC-Regular.ttf') format('truetype');
 }
 
-@font-face {
-  font-family: 'VIC-SemiBold';
-  font-style: normal;
-  src: url('./assets/fonts/VIC-SemiBold.eot');
-  src: url('./assets/fonts/VIC-SemiBold-iefix.eot?#iefix')
-      format('embedded-opentype'),
-    url('./assets/fonts/VIC-SemiBold.woff2') format('woff2'),
-    url('./assets/fonts/VIC-SemiBold.woff') format('woff'),
-    url('./assets/fonts/VIC-Regular.ttf') format('truetype');
-}
+// @font-face {
+//   font-family: 'VIC-SemiBold';
+//   font-style: normal;
+//   src: url('./assets/fonts/VIC-SemiBold.eot');
+//   src: url('./assets/fonts/VIC-SemiBold-iefix.eot?#iefix')
+//       format('embedded-opentype'),
+//     url('./assets/fonts/VIC-SemiBold.woff2') format('woff2'),
+//     url('./assets/fonts/VIC-SemiBold.woff') format('woff'),
+//     url('./assets/fonts/VIC-Regular.ttf') format('truetype');
+// }
 
 @font-face {
   font-family: 'VIC-Bold';
@@ -41,10 +43,16 @@
 $primary: #201547;
 $secondary: #0072ce;
 $tertiary: #53565a;
+$success: #00b140;
+$danger: #d50032;
 $headings-font-family: VIC-Bold;
 $font-family-sans-serif: VIC-Regular;
 $component-active-bg: $primary;
 $enable-rounded: false;
+$table-cell-vertical-align: middle;
+$font-family-monospace: 'Roboto Mono', SFMono-Regular, Menlo, Monaco, Consolas,
+  'Liberation Mono', 'Courier New', monospace;
+$table-bg-scale: -80%;
 
 // 3. Include remainder of required Bootstrap stylesheets
 @import '../node_modules/bootstrap/scss/variables';
@@ -53,7 +61,9 @@ $enable-rounded: false;
 $theme-colors: (
   'primary': $primary,
   'secondary': $secondary,
-  'tertiary': $tertiary
+  'tertiary': $tertiary,
+  'success': $success,
+  'danger': $danger
 );
 
 $colors: (
@@ -67,7 +77,6 @@ $colors: (
 @import '../node_modules/bootstrap/scss/root';
 
 // 6. Optionally include any other parts as needed
-@import '../node_modules/bootstrap/scss/root';
 @import '../node_modules/bootstrap/scss/reboot';
 @import '../node_modules/bootstrap/scss/type';
 @import '../node_modules/bootstrap/scss/containers';
@@ -82,7 +91,25 @@ $colors: (
 @import '../node_modules/bootstrap/scss/card';
 @import '../node_modules/bootstrap/scss/utilities';
 @import '../node_modules/bootstrap/scss/utilities/api';
-@import '../node_modules/bootstrap/scss/modal';
 @import '../node_modules/bootstrap/scss/offcanvas';
 @import '../node_modules/bootstrap/scss/placeholders';
 @import '../node_modules/bootstrap/scss/close';
+@import '../node_modules/bootstrap/scss/images';
+
+// 6. Other custom css
+.table tbody td {
+  font-family: $font-family-monospace;
+}
+
+.table td,
+.table > thead th:not(:first-child) {
+  text-align: right;
+}
+.table .subrow th {
+  font-weight: normal;
+  padding-left: $spacer * 2;
+}
+
+.sparkline {
+  min-width: $spacer * 5;
+}

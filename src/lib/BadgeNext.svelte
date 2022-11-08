@@ -3,7 +3,7 @@
 </script>
 
 <a
-  href="https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/latest-release"
+  href="https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia"
   class="btn btn-outline-tertiary w-100"
   target="_blank"
   rel="noreferrer"

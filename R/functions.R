@@ -51,7 +51,10 @@ series_req_update <- function(series_ids, update_tbls = NULL, conn = NULL){
 
 # Path helpers
 path_asset <- function(x) normalizePath(file.path("../src/assets", x))
-path_src <- function(x) normalizePath(file.path("../src/src", x))
+path_sparkline <- function(x) normalizePath(
+  file.path("../public/sparklines", paste0(x, ".svg"))
+  )
+path_src <- function(x) normalizePath(file.path("../src/lib", x))
 
 
 # Number formatters
@@ -73,7 +76,7 @@ comma <- function(val, suffix = NULL, add_sign = FALSE, decimal = 2){
 }
 
 format_percent <- function(val, add_sign = FALSE){
-  comma(val, "%", add_sign)
+  comma(val, "%", add_sign, decimal = 1)
 }
 
 format_number <- function(val, add_sign = FALSE){
@@ -91,14 +94,14 @@ format_any <- function(val, form = "number", add_sign = FALSE){
     form == "PERCENT", format_percent(val, add_sign),
     form == "STOCK"  , format_number(val, add_sign),
     form == "FLOW"   , format_number(val, add_sign),
-    form == "PPT"    , comma(val, " ppt", add_sign, 1),
+    form == "PPT"    , comma(val, ppt_abbr, add_sign, 1),
     TRUE             , comma(val, NULL, add_sign)
   )
 }
 
 # HTML funtions
-tagfun <- function(..., tag){
-  i <- match.call(expand.dots = FALSE)[[2]]
+tagfun <- function(..., tag, selfclosing = FALSE){
+  i <- list(...)
   n <- names(i)
   
   
@@ -112,9 +115,14 @@ tagfun <- function(..., tag){
     attrs <- ""
   }
   
-  open_tag <- paste0("<", tag, attrs, ">")
-  close_tag <- paste0("</", tag, ">")
-  return(c(open_tag, unlist(i), close_tag))
+  if(selfclosing){
+    open_tag <- paste0("<", tag, attrs, "/>")
+    return(open_tag)
+  } else {
+    open_tag <- paste0("<", tag, attrs, ">")
+    close_tag <- paste0("</", tag, ">")
+    return(c(open_tag, unlist(i), close_tag))
+  }
 }
 
 div <- function(...){
@@ -141,7 +149,7 @@ tr <- function(...){
   tagfun(..., tag = "tr")
 }
 
-table <- function(...){
+table_tag <- function(...){
   tagfun(..., tag = "table")
 }
 
@@ -153,71 +161,97 @@ tbody <- function(...){
   tagfun(..., tag = "tbody")
 }
 
+caption <- function(...){
+  tagfun(..., tag = "caption")
+}
 
+svg_tag <- function(...){
+  tagfun(..., tag = "svg")
+}
 
+br <- function(){"<br/>"}
 
+img <- function(...){
+  tagfun(..., tag = "img", selfclosing = TRUE)
+}
 
-# Column for tables; defined as a list of title and value functions
-# table_breakpoints <- list(
-#   # Current value column
-#   current = list(
-#     title = function(date){
-#       sprintf(
-#         '<strong>Current figure</strong><br/><small class="text-muted text-uppercase">%s</small>',
-#         format(max(date), "%b %Y")
-#       )
-#     },
-#     value = function(date, value, form){
-#       paste0(
-#         "<td>",
-#         num_format(value[date == max(date)], form),
-#         "</td>"
-#         )
-#     }
-#   ),
-#   # Last month column
-#   last_month = list(
-#     title = function(date){
-#       sprintf(
-#         '<strong>one month change</strong><br/><small class="text-muted text-uppercase">%s</small>',
-#         format(max(date) - months(1), "%b %Y")
-#       )
-#     },
-#     value = function(date, value, form){
-#       
-#       this_month <- value[date == max(date)]
-#       last_month <- value[date == max(date) - months(1)]
-#       month_diff <- this_month - last_month
-#       month_diff_form <- ifelse(
-#         form == "percent", 
-#         '<abbr title = "Percentage points" class="text-decoration-none"> ppts</abbr>', 
-#         paste0(
-#           '<br/><small class="text-muted">(',
-#           num_format(month_diff, "percent"),
-#           ")</small>"
-#         )
-#         )
-#       
-#       form <- ifelse(form == "percent", "number", form)
-#       
-#       paste0(
-#         "<td>",
-#         num_format(value[date == max(date) - months(1)], form),
-#         month_diff_form,
-#         "</td>"
-#       )
-#     }
-#   )
-# )
+abbr <- function(...){
+  tagfun(..., tag = "abbr")
+}
+
+ppt_abbr <- paste(
+  abbr(
+  class = "text-decoration-none", 
+  title="Percentage points",
+  "&nbsp;ppt"
+  ),
+  collapse = " "
+)
+
+# Sparkline fun
+pal <- c(
+  "#62BB46",
+  "#1D9EC3",
+  "#14826D",
+  "#BCD3EF",
+  "#2A6FA2",
+  "#004676",
+  "#745ECF",
+  "#C0E4B5",
+  "#53565A",
+  "#1F1547"
+)
+
+rescale <- function(x, newmax, newmin = 0, decimal = 2){
+  x <- (x-min(x))/(max(x)-min(x))
+  round(x * (newmax - newmin) + newmin, decimal)
+}
+
+sparkline <- function(
+    y, 
+    width = 150, 
+    height = 50, 
+    pad = 6, 
+    colour = "#201547"
+  ){
+  n <- length(y)
+  x <- rescale(seq_len(n), newmax = width - pad,  newmin = pad)
+  y <- rescale(y, newmax = pad, newmin = height - pad)
+  
+  points <- paste(paste0(x, ",", y), collapse = " ")
+  
+  svg_tag(
+    height = height,
+    width = width,
+    version = 1.1,
+    xmlns = "http://www.w3.org/2000/svg",
+    paste0(
+      '<polyline points="',
+      points,
+      '" style="fill:none;stroke:',
+      colour,
+      ';stroke-width:3" />'
+    ),
+    sprintf(
+      '<circle cx="%s" cy="%s" r="4" fill="white" stroke = "%s" stroke-width="3"/>',
+      last(x), 
+      last(y),
+      colour
+      )
+  )
+}
 
 
 # Generate html table 
 make_table <- function(
     series_ids, 
+    row_headers,
     highlight_rows, 
+    up_is_good,
     smoothing = NULL, 
-    caption = NULL,
-    conn = NULL
+    notes = NULL,
+    conn = NULL,
+    table_class = "table table-hover table-borderless"
 ){
   
   # Ensure connection exists
@@ -226,6 +260,11 @@ make_table <- function(
   } else if(is.null(conn)) {
     conn <- con
   } 
+  
+  
+  # Collapse caption
+  notes <- paste(unique(notes), collapse = " ")
+  
   
   # Get data
   df <- dbGetQuery(
@@ -254,7 +293,7 @@ make_table <- function(
   # Smooth data
   smoothing[is.na(smoothing)] <- 1
   df[, smoothing := smoothing[match(series_id, series_ids)]]
-  df[, value2 := frollmean(value, smoothing[1]), series_id]
+  df[, value := frollmean(value, smoothing[1]), series_id]
   
   # Check time interval
   interval <- df[, unique(frequency)]
@@ -262,61 +301,209 @@ make_table <- function(
     "Tables can only have one frequency (e.g. not monthly AND quarterly)"
   )
   
+  # Generate sparklines
+  
+  sparkcolour <- rep(pal, ceiling(length(series_ids) / length(pal)))
+  
+  sparkdata <- df[
+    date >= max(date) - months(12 * 3), 
+    .(sparkline = sparkline(value, colour = sparkcolour[.GRP])),
+    series_id
+  ]
+  sparkdata[, writeLines(sparkline, path_sparkline(series_id)), series_id]
+
+  sparktext <- df[
+    date > max(date) - months(12 * 3), 
+    .(
+      current = last(value),
+      average = mean(value, na.rm = TRUE),
+      name = tolower(row_headers[match(series_id[1], series_ids)])
+    ),
+    series_id
+  ]
+  
+  sparktext[
+    , `:=`(
+    name = fcase(
+      grepl("rate|ratio", name), paste("The", name, "is"),
+      grepl("persons", name), paste("The number of", name, "is"),
+      grepl("employed ", name), paste("The number of people", name, "is"),
+      rep(TRUE, .N), paste0(toupper(substring(name, 1,1)), substring(name, 2)," is")
+    ),
+    movement = fifelse(
+      current >= average, 
+      "higher than average",
+      "lower than average"
+      )
+  )
+  ]
+  
+  sparktext[, alt := paste(name, movement)]
+  
+  
   # Get interval dates
-  date_latest <- df[, max(date)]
-  date_last   <- df[, max(date[date != max(date)])]
-  date_year   <- df[, max(date) - months(12)]
-  date_covid  <- as.Date("2019-03-01")
+  breaks <- c(
+    current =  df[, max(date)],
+    last    = df[, max(date[date != max(date)])],
+    year    = df[, max(date) - months(12)],
+    covid   = as.Date("2019-03-01")
+  )
+  
+  # Generate deltas
+  deltas <- df[date %in% breaks]
+  deltas[, date := names(breaks)[match(date, breaks)]]
+  deltas[, date := factor(date, levels = names(breaks))]
+  deltas <- dcast(deltas, series_id + data_type ~ date, value.var = "value")
+  
+  diff_cols <- names(breaks)[names(breaks) != "current"]
+  deltas[, (diff_cols) := lapply(.SD, \(x) current - x), .SDcols = diff_cols]
   
   
-  # Generate time summary
-  df_current <- df[
-    date == date_latest, 
-    .(current = format_any(value, data_type)), 
-    keyby = series_id
-  ]
-  df_last <- df[
-    date %in% c(date_latest, date_last),
-    .(
-      last = format_any(
-        value[date == date_latest] - value[date == date_last], 
-        form = ifelse(data_type[1] == "PERCENT", "PPT", data_type),
-        add_sign =  TRUE
-      )
-    ), 
-    keyby = series_id
-  ]
-  df_year <- df[
-    date %in% c(date_latest, date_year),
-    .(
-      year = format_any(
-        value[date == date_latest] - value[date == date_year], 
-        form = ifelse(data_type[1] == "PERCENT", "PPT", data_type),
-        add_sign =  TRUE
-      )
-    ),  
-    keyby = series_id
-  ]
-  df_covid <- df[
-    date %in% c(date_latest, date_covid),
-    .(
-      covid = format_any(
-        value[date == date_latest] - value[date == date_covid], 
-        form = ifelse(data_type[1] == "PERCENT", "PPT", data_type),
-        add_sign =  TRUE
-      )
-    ),  
+  # Generate current backgrounds
+  avg_3_year <- df[
+    date >= max(date) - months(12 * 3), 
+    .(avg  = mean(value)),
     keyby = series_id
   ]
   
-  # Combine summary data
-  Reduce(
-    merge.data.table,
-    list(
-      df_current, 
-      df_last,
-      df_year,
-      df_covid
+  backgrounds <- deltas[avg_3_year][,
+    `:=`(
+      up_is_good = up_is_good[match(series_id, series_ids)],
+      current = current - avg,
+      avg = NULL,
+      data_type = NULL
+    )
+  ][,
+    (names(breaks)) := lapply(.SD, \(x){
+      fifelse(
+        (x >= 0 & up_is_good) | (x <= 0 & !up_is_good),
+        "table-success",
+        "table-danger"
+        )
+    }),
+    .SDcols = names(breaks)
+  ][,
+    up_is_good := NULL
+  ]
+  
+  backgrounds <- melt.data.table(
+    data = backgrounds, 
+    id.vars = "series_id",
+    measure.vars = names(breaks),
+    variable.name = "date",
+    value.name = "bg"
+    )
+  
+  
+  # format deltas
+  deltas[, current := format_any(current, data_type)]
+  deltas[data_type == "PERCENT", data_type := "PPT"]
+  deltas[, 
+    (diff_cols) := lapply(.SD, format_any, form = data_type, add_sign = TRUE),
+    .SDcols = diff_cols
+  ]
+  deltas[, data_type := NULL]
+  
+  
+  # Convert to HTML table
+  tdeltas <- as.data.table(t(deltas))
+  
+  rows <- sapply(tdeltas, function(x){
+    row_title     <- row_headers[match(x[1], series_ids)]
+    row_content   <- x[2:length(x)]
+    row_highlight <- highlight_rows[match(row_title, row_headers)]
+    alt_text      <- sparktext$alt[match(x[1], sparktext$series_id)]
+    row_classes   <- backgrounds[series_id == x[1], bg] 
+    
+    if(row_highlight){
+      tr(
+        class = "border-top",
+        th(row_title, scope = "row"),
+        td(
+          img(
+            src = paste0("./sparklines/", x[1], ".svg"), 
+            alt = alt_text,
+            class = "img-fluid sparkline float-start"
+            )
+          ),
+        mapply(td, row_content, class = row_classes)
+      )
+    } else {
+      tr(
+        class = "subrow",
+        th(row_title, scope = "row"),
+        td(
+          img(
+            src = paste0("./sparklines/", x[1], ".svg"), 
+            alt = alt_text,
+            class = "img-fluid sparkline float-start"
+          )
+        ),
+        mapply(td, row_content, class = row_classes)
+      )
+    }
+    
+  })
+  
+  rows <- tbody(rows)
+  
+  header <- thead(
+    td(""),
+    th(
+      class = "text-start",
+      scope = "col",
+      "Recent trend",
+      br(),
+      small(
+        class = "text-muted p-0", 
+        "Last 3 years"
+      )
+    ),
+    th(
+      scope = "col",
+      "Latest figures",
+      br(),
+      small(
+        class = "text-muted p-0", 
+        format(breaks["current"], "%b&nbsp;%Y")
+        )
+    ),
+    th(
+      scope = "col",
+      paste("One", tolower(interval), "change"),
+      br(),
+      small(
+        class = "text-muted p-0", 
+        format(breaks["last"], "%b&nbsp;%Y")
+      )
+    ),
+    th(
+      scope = "col",
+      "One year change",
+      br(),
+      small(
+        class = "text-muted p-0", 
+        format(breaks["year"], "%b&nbsp;%Y")
+      )
+    ),
+    th(
+      scope = "col",
+      "Change since COVID&#8209;19",
+      br(),
+      small(
+        class = "text-muted p-0", 
+        format(breaks["covid"], "%b&nbsp;%Y")
+      )
+    )
+  )
+  
+  # Return table
+  return(
+    table_tag(
+      class = table_class, 
+      caption(notes),
+      header,
+      rows
     )
   )
   
