@@ -19,3 +19,9 @@ Overview,A84426256L,Monthly hours worked in all jobs,TRUE,,TRUE,
 Overview,A85223450L,Underemployment rate,TRUE,,FALSE,
 Overview,A85223451R,Underutilisation rate,TRUE,,FALSE,
 Overview,A84423356T,Employment to population ratio,TRUE,,TRUE,
+Indicators,A84423349V,Employed persons,TRUE,,TRUE,Based on Australian Bureau of Statistics Labour Force.
+Indicators,A84423357V,Employed full-time,FALSE,,TRUE,"Data not seasonally adjusted. Differences are calculated based on unrounded numbers, following the ABS convention"
+Indicators,pt_emp_vic,Employed part-time,FALSE,,TRUE,
+Indicators,A84423356T,Employment to population ratio,TRUE,,TRUE,
+Indicators,A84423244X,Employment to population ratio (Males),FALSE,,TRUE,
+Indicators,A84423468K,Employment to population ratio (Females),FALSE,,TRUE,
