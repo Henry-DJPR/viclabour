@@ -17,8 +17,7 @@ options(repos=structure(c(CRAN="http://cran.rstudio.com/")))
 
 
 # Load in custom functions
-source("functions.R")
-
+lapply(list.files("R", full.names = TRUE), source)
 
 
 
@@ -26,7 +25,8 @@ source("functions.R")
 p_load(
   data.table,
   RPostgres,
-  rjson
+  jsonlite,
+  pbapply
 )
 
 
@@ -139,7 +139,7 @@ if(update_required){
       by = "table_name"
     )
     
-    table_list <- lapply(table_list, \(x){
+    table_list <- pblapply(table_list, \(x){
       make_table(
         series_ids = x$series_id,
         row_headers = x$name,

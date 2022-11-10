@@ -41,7 +41,7 @@
 <main>
   <div class="container py-4 px-3">
     <h1 class="my-5 display-3 text-center text-md-start">
-      Victorian labour dashboard
+      Victorian jobs dashboard
     </h1>
     <div class="row gy-2">
       <div class="col-sm">

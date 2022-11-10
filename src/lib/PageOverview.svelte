@@ -1,10 +1,11 @@
 <script>
   import TableOverview from './TableOverview.svelte'
+  import Highchart from './Highchart.svelte'
 </script>
 
 <p>
-  The Victorian labour dashboard explores information on Victorian employment
-  and job seekers. Use the <a
+  The Victorian jobs dashboard explores information on Victorian employment and
+  job seekers. Use the <a
     data-bs-toggle="offcanvas"
     href="#sidebarNav"
     aria-controls="sidebarNav"
@@ -15,3 +16,6 @@
 <div class="table-responsive my-5">
   <TableOverview />
 </div>
+
+<h2>Highchart test</h2>
+<Highchart chartType="stock" />
