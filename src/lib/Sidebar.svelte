@@ -1,8 +1,27 @@
 <script>
+  import { onMount } from 'svelte'
+  import Highcharts from 'highcharts'
   import { Offcanvas, Collapse } from '../../node_modules/bootstrap'
   export let tabPanes = [{ id: 'home', name: 'Home' }]
   let firstPane = tabPanes[0]
   let panes = tabPanes.slice(1)
+  let bsOffcanvas
+
+  onMount(async () => {
+    bsOffcanvas = new Offcanvas('#sidebarNav')
+  })
+
+  function dismiss() {
+    bsOffcanvas.hide()
+    Highcharts.charts.map((c) => {
+      const t = c.title.textStr
+      const st = c.subtitle.textStr
+      c.setTitle({ text: t })
+      c.setSubtitle({ text: st })
+      c.redraw()
+      c.reflow()
+    })
+  }
 </script>
 
 <div
@@ -23,11 +42,6 @@
     />
   </div>
   <div class="offcanvas-body">
-    <div>
-      Select one of the following options for detailed breakdowns of Victorian
-      labour by various demographics.
-    </div>
-
     <ul class="nav flex-column nav-pills my-4 fs-5" aria-orientation="vertical">
       <li class="nav-item" role="presentation">
         <a
@@ -39,6 +53,7 @@
           data-bs-target="#{firstPane.id}"
           aria-controls={firstPane.id}
           aria-selected="true"
+          on:click={dismiss}
         >
           {firstPane.name}
         </a>
@@ -72,6 +87,7 @@
                     data-bs-target="#{subItem.id}"
                     aria-controls={subItem.id}
                     aria-selected="false"
+                    on:click={dismiss}
                   >
                     {subItem.name}
                   </a>
@@ -89,6 +105,7 @@
               data-bs-target="#{pane.id}"
               aria-controls={pane.id}
               aria-selected="false"
+              on:click={dismiss}
             >
               {pane.name}
             </a>

@@ -32,7 +32,7 @@ datetime_to_timestamp <- function(dt) {
 }
 
 # Extract sates from chararacter vector
-state_order <- c("NSW", "Vic", "QLD", "SA", "WA", "Tas", "NT", "ACT")
+state_order <- c("Vic", "Aus", "NSW", "QLD", "SA", "WA", "Tas", "NT", "ACT")
 
 recode_states <- function(v){
   
@@ -44,7 +44,8 @@ recode_states <- function(v){
     WA  = "Western Australia",
     Tas = "Tasmania",
     NT  = "Northern Territory",
-    ACT = "Australian Capital Territory"
+    ACT = "Australian Capital Territory",
+    Aus = "Australia"
   )
   
   v <- tstrsplit(v, split = ";")
@@ -79,7 +80,7 @@ to_series_list <- function(
     y, 
     group, 
     series_type = "line", 
-    visible = NULL
+    inactive = c()
   ){
   df <- copy(df)
   setDT(df)
@@ -94,30 +95,28 @@ to_series_list <- function(
   }
   df <- split(df, by = "group", keep.by = FALSE)
   
-  # mapply(
-  #   function(n, type){#, vis){
-  #     list(
-  #       name = n,
-  #       type = type,
-  #       # visible = vis,
-  #       data = df[[n]]
-  #     )
-  #   },
-  #   n = names(df),
-  #   type =  series_type,
-  #   # vis = visible,
-  #   SIMPLIFY = FALSE
-  # )
-  
-  lapply(
+  out <- lapply(
     names(df),
-    \(x) list(
-      name = x,
-      type = series_type,
-      visible = TRUE,
-      data = df[[x]]
-    )
+    \(x) {
+      if(x %in% inactive){
+        list(
+          name = x,
+          type = series_type,
+          data = df[[x]],
+          visible = FALSE
+        )
+      } else {
+        list(
+          name = x,
+          type = series_type,
+          data = df[[x]],
+          visible = TRUE
+        )
+      }
+    }
   )
+  
+  return(out)
 
 }
 

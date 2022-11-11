@@ -1,6 +1,5 @@
 <script>
   import TableOverview from './TableOverview.svelte'
-  import Highchart from './Highchart.svelte'
 </script>
 
 <p>
@@ -16,6 +15,3 @@
 <div class="table-responsive my-5">
   <TableOverview />
 </div>
-
-<h2>Highchart test</h2>
-<Highchart chartType="stock" />

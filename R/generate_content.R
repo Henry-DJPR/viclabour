@@ -114,28 +114,28 @@ update_required <- length(tables_to_update) > 0
 # Update content
 if(update_required){
   
-  # Read in table generation csv
+  # Read in table generation csv & find all viz functions
   table_meta <- fread("table_meta.csv", data.table = TRUE)
-  
+  vizualisations <- ls(pattern = "viz_")
   
   
   
   # Determine tables to update
-  to_update <- table_meta[, .(update = series_req_update(series_id)), table_name]
-  to_update <- to_update[update == TRUE, table_name]
+  update_tables <- table_meta[, .(update = series_req_update(series_id)), table_name]
+  update_tables <- update_tables[update == TRUE, table_name]
   
   
   
   
   # Generate tables
-  if(length(to_update) > 0){
+  if(length(update_tables) > 0){
     message(
       "Updating the following website tables:\n",
-      paste(to_update, collapse = "\n")
+      paste(update_tables, collapse = "\n")
     )
     
     table_list <- split(
-      table_meta[table_name %in% to_update],
+      table_meta[table_name %in% update_tables],
       by = "table_name"
     )
     
@@ -161,6 +161,18 @@ if(update_required){
     
     
   }
+  
+  
+  # Update chart data
+  message("Updating chart data")
+  pblapply(vizualisations, function(v){
+    out <- get(v)()
+    write_json(
+      out, 
+      paste0("../public/highcharts_data/", v, ".json"), 
+      auto_unbox = TRUE
+      )
+  })
   
   
 }
