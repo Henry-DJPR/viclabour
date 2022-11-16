@@ -17,6 +17,7 @@
   chartType="stock"
   chartId="viz_ind_emppop_state_line"
   containerClass="my-5"
+  height="550px"
 />
 <Highchart
   chartType="stock"

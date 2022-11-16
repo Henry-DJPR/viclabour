@@ -13,14 +13,6 @@
 
   function dismiss() {
     bsOffcanvas.hide()
-    Highcharts.charts.map((c) => {
-      const t = c.title.textStr
-      const st = c.subtitle.textStr
-      c.setTitle({ text: t })
-      c.setSubtitle({ text: st })
-      c.redraw()
-      c.reflow()
-    })
   }
 </script>
 

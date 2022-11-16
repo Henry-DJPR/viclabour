@@ -36,46 +36,19 @@
   // Chart defults
   Highcharts.setOptions({
     chart: {
-      style: {
-        fontFamily: 'VIC-Regular',
-        fontSize: '1rem'
-      }
+      styledMode: true
     },
     credits: {
       enabled: false
     },
     title: {
-      align: 'left',
-      style: {
-        fontSize: '1.5rem'
-      }
+      align: 'left'
     },
     subtitle: {
-      align: 'left',
-      style: {
-        fontSize: '1rem'
-      }
-    },
-    xAxis: {
-      labels: {
-        style: {
-          fontSize: '1rem'
-        }
-      }
+      align: 'left'
     },
     yAxis: {
-      gridLineColor: 'transparent',
-      opposite: false,
-      labels: {
-        style: {
-          fontSize: '1rem'
-        }
-      }
-    },
-    legend: {
-      itemStyle: {
-        fontSize: '1rem'
-      }
+      opposite: false
     }
   })
 
