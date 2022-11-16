@@ -47,7 +47,7 @@
     title: {
       align: 'left',
       style: {
-        fontSize: '1.25rem'
+        fontSize: '1.5rem'
       }
     },
     subtitle: {

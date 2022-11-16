@@ -40,7 +40,7 @@
 <Sidebar {tabPanes} />
 <main>
   <div class="container py-4 px-3">
-    <h1 class="my-5 display-3 text-center text-md-start">
+    <h1 class="mb-5 mt-3 display-3 text-center text-md-start">
       Victorian jobs dashboard
     </h1>
     <div class="row gy-2">

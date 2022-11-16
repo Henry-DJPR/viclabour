@@ -53,6 +53,7 @@ $table-cell-vertical-align: middle;
 $font-family-monospace: 'Roboto Mono', SFMono-Regular, Menlo, Monaco, Consolas,
   'Liberation Mono', 'Courier New', monospace;
 $table-bg-scale: -80%;
+$spacer: 1.5rem;
 
 // 3. Include remainder of required Bootstrap stylesheets
 @import '../node_modules/bootstrap/scss/variables';
